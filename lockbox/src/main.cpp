@@ -9,6 +9,7 @@
 #include <freertos/task.h>
 
 #include "oled_task.h"
+#include "i2c_task.h"
 
 // Set LED_BUILTIN if it is not defined by Arduino framework
 #ifndef LED_BUILTIN
@@ -37,43 +38,14 @@ void setup()
   //Serial
   Serial.begin(9600);
 
-  // I2C
-  Wire.begin();
+  i2c_init();
 
-  byte error, address;
-  int nDevices;
-  Serial.println("Scanning...");
-  nDevices = 0;
-  for(address = 1; address < 127; address++ ) {
-    Wire.beginTransmission(address);
-    error = Wire.endTransmission();
-    if (error == 0) {
-      Serial.print("I2C device found at address 0x");
-      if (address<16) {
-        Serial.print("0");
-      }
-      Serial.println(address,HEX);
-      nDevices++;
-    }
-    else if (error==4) {
-      Serial.print("Unknow error at address 0x");
-      if (address<16) {
-        Serial.print("0");
-      }
-      Serial.println(address,HEX);
-    }    
-  }
-  if (nDevices == 0) {
-    Serial.println("No I2C devices found\n");
-  }
-  else {
-    Serial.println("done\n");
-  }
+  i2c_scan();
 
   Serial.println("\nCreating Tasks...\n");
 
   xTaskCreate(blink_task, "blink", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
-  // xTaskCreate(oled_task, "oled", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
+  xTaskCreate(oled_task, "oled", 2000, NULL, 5, NULL);
   Serial.println("Done!");
 }
 
