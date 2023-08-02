@@ -7,6 +7,7 @@
 #include <Arduino.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include <freertos/queue.h>
 
 #include "oled_task.h"
 #include "i2c_task.h"
@@ -29,6 +30,9 @@ void blink_task(void *pvParameter)
   }
 }
 
+// Create a queue for sending debug strings to oled task.
+QueueHandle_t oled_msg_queue = xQueueCreate(8, 21);
+
 void setup()
 {
   // initialize LED digital pin as an output.
@@ -45,13 +49,18 @@ void setup()
   Serial.println("\nCreating Tasks...\n");
 
   xTaskCreate(blink_task, "blink", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
-  xTaskCreate(oled_task, "oled", 2000, NULL, 5, NULL);
+  xTaskCreate(oled_task, "oled", 2000, &oled_msg_queue, 5, NULL);
   Serial.println("Done!");
 }
 
 void loop()
 {
-  int FRC;
-  FRC++;
-  delay(1000);
+  // This fn is required by the arduino framework, but we are not using it. 
+  // So it will simply delete itself (for now)
+  static int FRC;
+  char string[21];
+  sprintf(string, "%i", FRC++);
+  xQueueSendToBack(oled_msg_queue, string, portMAX_DELAY);
+  vTaskDelay(ONE_SECOND);
+  // vTaskDelete(NULL);
 }

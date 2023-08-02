@@ -5,6 +5,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <list>
 
 #define OLED_WIDTH 128
 #define OLED_HEIGHT 64
@@ -13,10 +14,6 @@
 
 #define N_TEXT_ROWS 7
 #define N_CHARS 21
-
-// int oled_row_locations[N_TEXT_ROWS] = {
-//     0, 9, 18, 27, 36, 45, 54
-// };
 
 void oled_task(void *);
 
