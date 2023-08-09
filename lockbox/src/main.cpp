@@ -11,13 +11,13 @@
 
 #include "oled_task.h"
 #include "i2c_task.h"
+#include "debug.h"
+#include "touch_task.h"
 
 // Set LED_BUILTIN if it is not defined by Arduino framework
 #ifndef LED_BUILTIN
     #define LED_BUILTIN GPIO_NUM_2
 #endif
-
-#define ONE_SECOND 1000 / portTICK_PERIOD_MS
 
 void blink_task(void *pvParameter)
 {
@@ -50,6 +50,7 @@ void setup()
 
   xTaskCreate(blink_task, "blink", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
   xTaskCreate(oled_task, "oled", 2000, &oled_msg_queue, 5, NULL);
+  xTaskCreate(touch_sensor_task, "touch", 2000, NULL, 5, NULL);
   Serial.println("Done!");
 }
 
@@ -57,10 +58,14 @@ void loop()
 {
   // This fn is required by the arduino framework, but we are not using it. 
   // So it will simply delete itself (for now)
-  static int FRC;
-  char string[21];
-  sprintf(string, "%i", FRC++);
-  xQueueSendToBack(oled_msg_queue, string, portMAX_DELAY);
-  vTaskDelay(ONE_SECOND);
+#ifdef DEBUG
+  // static int FRC;
+  // char string[21];
+  // sprintf(string, "%i", FRC++);
+  // oled_debug(string);
+  // vTaskDelay(10/portTICK_PERIOD_MS);
   // vTaskDelete(NULL);
+#else
+  vTaskDelete(NULL);
+#endif
 }
