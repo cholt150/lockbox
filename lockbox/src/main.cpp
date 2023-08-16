@@ -8,6 +8,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <freertos/queue.h>
+#include <Adafruit_MMC56x3.h>
 
 #include "oled_task.h"
 #include "i2c_task.h"
@@ -33,6 +34,8 @@ void blink_task(void *pvParameter)
 // Create a queue for sending debug strings to oled task.
 QueueHandle_t oled_msg_queue = xQueueCreate(8, 21);
 
+Adafruit_MMC5603 mmc = Adafruit_MMC5603(12345);
+
 void setup()
 {
   // initialize LED digital pin as an output.
@@ -46,6 +49,12 @@ void setup()
 
   i2c_scan();
 
+  if (!mmc.begin(MMC56X3_DEFAULT_ADDRESS, &Wire))
+  {  // I2C mode
+    /* There was a problem detecting the MMC5603 ... check your connections */
+    Serial.println("Ooops, no MMC5603 detected ... Check your wiring!");
+  }
+
   Serial.println("\nCreating Tasks...\n");
 
   xTaskCreate(blink_task, "blink", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
@@ -58,14 +67,22 @@ void loop()
 {
   // This fn is required by the arduino framework, but we are not using it. 
   // So it will simply delete itself (for now)
-#ifdef DEBUG
-  // static int FRC;
-  // char string[21];
-  // sprintf(string, "%i", FRC++);
-  // oled_debug(string);
-  // vTaskDelay(10/portTICK_PERIOD_MS);
-  // vTaskDelete(NULL);
-#else
+  float heading;
+  char str[21];
+  while(1)
+  {
+    sensors_event_t event;
+    mmc.getEvent(&event);
+    heading = (atan2(event.magnetic.y, event.magnetic.x) * 180) / PI;
+
+    sprintf(
+      str, 
+      "1:%i 2:%i", 
+      static_cast<int>(heading), 
+      static_cast<int>(event.magnetic.heading)
+    );
+    oled_debug(str);
+    vTaskDelay(MS(250));
+  }
   vTaskDelete(NULL);
-#endif
 }

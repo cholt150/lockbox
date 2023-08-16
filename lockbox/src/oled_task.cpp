@@ -23,6 +23,8 @@ void oled_task(void *pvParameters)
   display.setTextColor(1);     // Draw white text
   display.setCursor(0, 0);     // Start at top-left corner
   display.cp437(true);         // Use full 256 char 'Code Page 437' font
+  display.clearDisplay();
+  display.display();
 
   int count;
   uint8_t curr_row = 0;

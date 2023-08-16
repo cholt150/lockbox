@@ -9,7 +9,5 @@ void oled_debug(int n)
 
 void oled_debug(char *s)
 {
-  char string[21];
-  memcpy(s, string, sizeof(string));
-  xQueueSendToBack(oled_msg_queue, string, portMAX_DELAY);
+  xQueueSendToBack(oled_msg_queue, s, portMAX_DELAY);
 }
