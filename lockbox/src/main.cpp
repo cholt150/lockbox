@@ -10,10 +10,11 @@
 #include <freertos/queue.h>
 #include <Adafruit_MMC56x3.h>
 
+#include "debug.h"
 #include "oled_task.h"
 #include "i2c_task.h"
-#include "debug.h"
 #include "touch_task.h"
+#include "led_task.h"
 
 // Set LED_BUILTIN if it is not defined by Arduino framework
 #ifndef LED_BUILTIN
@@ -34,6 +35,7 @@ void blink_task(void *pvParameter)
 // Create a queue for sending debug strings to oled task.
 QueueHandle_t oled_msg_queue = xQueueCreate(8, 21);
 
+// Magnetometer object
 Adafruit_MMC5603 mmc = Adafruit_MMC5603(12345);
 
 void setup()
@@ -58,8 +60,9 @@ void setup()
   Serial.println("\nCreating Tasks...\n");
 
   xTaskCreate(blink_task, "blink", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
-  xTaskCreate(oled_task, "oled", 2000, &oled_msg_queue, 5, NULL);
-  xTaskCreate(touch_sensor_task, "touch", 2000, NULL, 5, NULL);
+  xTaskCreate(led_task, "leds", 2000, NULL, 5, NULL);
+  // xTaskCreate(oled_task, "oled", 2000, &oled_msg_queue, 5, NULL);
+  // xTaskCreate(touch_sensor_task, "touch", 2000, NULL, 5, NULL);
   Serial.println("Done!");
 }
 
@@ -71,17 +74,17 @@ void loop()
   char str[21];
   while(1)
   {
-    sensors_event_t event;
-    mmc.getEvent(&event);
-    heading = (atan2(event.magnetic.y, event.magnetic.x) * 180) / PI;
+    // sensors_event_t event;
+    // mmc.getEvent(&event);
+    // heading = (atan2(event.magnetic.y, event.magnetic.x) * 180) / PI;
 
-    sprintf(
-      str, 
-      "1:%i 2:%i", 
-      static_cast<int>(heading), 
-      static_cast<int>(event.magnetic.heading)
-    );
-    oled_debug(str);
+    // sprintf(
+    //   str, 
+    //   "1:%i 2:%i", 
+    //   static_cast<int>(heading), 
+    //   static_cast<int>(event.magnetic.heading)
+    // );
+    // oled_debug(str);
     vTaskDelay(MS(250));
   }
   vTaskDelete(NULL);
