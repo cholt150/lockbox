@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <cstring>
 
-#include "rtos_macros.h"
+#include "lockbox_common.h"
 
 extern QueueHandle_t oled_msg_queue;
 
