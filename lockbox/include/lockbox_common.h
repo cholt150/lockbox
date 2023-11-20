@@ -8,4 +8,14 @@
 
 template<class T> inline Print &operator <<(Print &obj, T arg);
 
+enum lock_state
+{
+    RESET,
+    STAGE_1,
+    STAGE_2,
+    STAGE_3,
+    STAGE_4,
+    STAGE_5,
+};
+
 #endif // !LOCKBOX_COMMON_H

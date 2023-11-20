@@ -1,43 +1,49 @@
 #include "input_task.h"
+#include "led_task.h"
 #include "lockbox_common.h"
 #include "BluetoothSerial.h"
 
 #include <Arduino.h>
 #include <WiFi.h>
-#include <CommandParser.h>
+#include <Cmd.h>
 
 extern bool gEnableMOSFET;
 
 extern BluetoothSerial SerialBT;
 
-typedef CommandParser<> MyCommandParser;
-MyCommandParser parser;
+extern lock_state state;
 
-void cmd_test(MyCommandParser::Argument *args, char *response) {
-    strlcpy(response, "success", MyCommandParser::MAX_RESPONSE_SIZE);
+void cmd_get_status(int argc, char **argv) {
+    auto stream = cmdGetStream();
+    stream->printf("Lock Status: %i\n", state);
+}
+
+void cmd_unlock(int argc, char **argv) {
+    int pulse = 750;
+    if(argc > 1) {
+        pulse = atoi(argv[1]);
+    }
+    for(auto i = 0; i < 5; i-=-1) {
+        set_strip(GREEN);
+        delay(200);
+        set_strip(OFF);
+        delay(200);
+    }
     gEnableMOSFET = true;
-    delay(750);
+    delay(pulse);
     gEnableMOSFET = false;
 }
 
 void input_task(void * pvParams)
 {
-    parser.registerCommand("UNLOCK", "s", &cmd_test);
-    Serial.println("registered command: TEST <string> <double> <int64> <uint64>");
-    Serial.println("example: TEST \"\\x41bc\\ndef\" -1.234e5 -123 123");
+    // Link up the command parser to the BT Serial stream
+    cmdInit(&SerialBT);
+    cmdAdd("unlock", cmd_unlock);
+    cmdAdd("status", cmd_get_status);
 
     while(1)
     {
-        if(SerialBT.available())
-        {
-            char buffer[128];
-            size_t line_length = SerialBT.readBytesUntil('\n', buffer, 127);
-            buffer[line_length] = '\0';
-
-            char response[MyCommandParser::MAX_RESPONSE_SIZE];
-            parser.processCommand(buffer, response);
-            SerialBT.println(response);
-        }
+        cmdPoll();
         vTaskDelay(MS(100));
     }
 }

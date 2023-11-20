@@ -100,6 +100,8 @@ static void run_startup_colors(void)
   set_strip(OFF);
 }
 
+lock_state state = RESET;
+
 void loop()
 {
   // This fn is required by the arduino framework, but we are not using it. 
@@ -121,6 +123,30 @@ void loop()
   //   SerialBT.println(str);
   //   vTaskDelay(MS(1000));
   // }
+
+  // Enumeration to describe lock states
   run_startup_colors();
+
+  while(1) {
+    switch(state) {
+      case RESET:
+        break;
+      case STAGE_1:
+        break;
+      case STAGE_2:
+        break;
+      case STAGE_3:
+        break;
+      case STAGE_4:
+        break;
+      case STAGE_5:
+        break;
+      default:
+        state = RESET;
+        break;
+    }
+
+    vTaskDelay(MS(100));
+  }
   vTaskDelete(NULL);
 }
