@@ -65,6 +65,7 @@ void setup()
   Serial.begin(9600);
   SerialBT.begin("Lockbox");
 
+  keypad_init();
 
   i2c_init();
 
@@ -81,7 +82,7 @@ void setup()
   xTaskCreate(blink_task, "blink", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
   xTaskCreate(led_task, "leds", 2000, NULL, 5, NULL);
   xTaskCreate(input_task, "serial_input", 2000, NULL, 7, NULL);
-  // xTaskCreate(keypad_task, "keypad", 2000, NULL, 7, NULL);
+  xTaskCreate(keypad_task, "keypad", 2000, NULL, 7, NULL);
   // xTaskCreate(oled_task, "oled", 2000, &oled_msg_queue, 5, NULL);
   xTaskCreate(touch_sensor_task, "touch", 2000, NULL, 5, NULL);
   Serial.println("Done!");

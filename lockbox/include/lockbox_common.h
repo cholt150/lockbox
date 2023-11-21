@@ -6,6 +6,9 @@
 #define ONE_SECOND 1000 / portTICK_PERIOD_MS
 #define MS(x) x / portTICK_PERIOD_MS
 
+#define GPIO_ON 1
+#define GPIO_OFF 0
+
 template<class T> inline Print &operator <<(Print &obj, T arg);
 
 enum lock_state
