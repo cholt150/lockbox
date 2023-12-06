@@ -24,9 +24,9 @@
 
 typedef enum
 {
-    FALLING_EDGE,
-    RISING_EDGE,
-    NO_EDGE
+  FALLING_EDGE,
+  RISING_EDGE,
+  NO_EDGE
 } Edge_Type;
 
 void keypad_init(void);

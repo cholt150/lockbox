@@ -12,23 +12,23 @@
 extern BluetoothSerial SerialBT;
 
 enum {
-    OFF,
-    RED,
-    GREEN,
-    BLUE,
-    YELLOW,
-    NUM_COLORS
+  OFF,
+  RED,
+  GREEN,
+  BLUE,
+  YELLOW,
+  NUM_COLORS
 };
 
 typedef struct {
-    uint8_t red;
-    uint8_t green;
-    uint8_t blue;
+  uint8_t red;
+  uint8_t green;
+  uint8_t blue;
 } rgb_triple;
 
 typedef struct {
-    uint8_t led_number;
-    uint8_t color;
+  uint8_t led_number;
+  uint8_t color;
 } led_state;
 
 void led_task(void *pvParams);

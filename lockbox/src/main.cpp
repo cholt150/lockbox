@@ -1,9 +1,3 @@
-/*
- * Blink
- * Turns on an LED on for one second,
- * then off for one second, repeatedly.
- */
-
 #include <Arduino.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
@@ -11,7 +5,6 @@
 #include <Adafruit_MMC56x3.h>
 
 #include "lockbox_common.h"
-#include "BluetoothSerial.h"
 #include "debug.h"
 #include "oled_task.h"
 #include "i2c_task.h"
@@ -19,13 +12,6 @@
 #include "led_task.h"
 #include "input_task.h"
 #include "keypad_task.h"
-
-// Set LED_BUILTIN if it is not defined by Arduino framework
-#ifndef LED_BUILTIN
-    #define LED_BUILTIN GPIO_NUM_2
-#endif
-// Our latch MOSFET is tied to GPIO 12
-#define MOSFET_PIN GPIO_NUM_12
 
 // This global is used to set the state of the MOSFET
 bool gEnableMOSFET = false;
@@ -45,7 +31,7 @@ void blink_task(void *pvParameter)
 template<class T> inline Print &operator <<(Print &obj, T arg) { obj.print(arg); return obj; }
 
 // Create a queue for sending debug strings to oled task.
-QueueHandle_t oled_msg_queue = xQueueCreate(8, 21);
+QueueHandle_t keypad_queue_handle = xQueueCreate(5, sizeof(char));
 
 // Magnetometer object
 Adafruit_MMC5603 mmc = Adafruit_MMC5603(12345);
@@ -71,10 +57,10 @@ void setup()
 
   i2c_scan();
 
+  // Initialize magnetic sensor
   if (!mmc.begin(MMC56X3_DEFAULT_ADDRESS, &Wire))
-  {  // I2C mode
-    /* There was a problem detecting the MMC5603 ... check your connections */
-    Serial.println("Ooops, no MMC5603 detected ... Check your wiring!");
+  {
+    Serial << "Unable to connect to MMC6503\n";
   }
 
   Serial.println("\nCreating Tasks...\n");
@@ -83,7 +69,6 @@ void setup()
   xTaskCreate(led_task, "leds", 2000, NULL, 5, NULL);
   xTaskCreate(input_task, "serial_input", 2000, NULL, 7, NULL);
   xTaskCreate(keypad_task, "keypad", 2000, NULL, 7, NULL);
-  // xTaskCreate(oled_task, "oled", 2000, &oled_msg_queue, 5, NULL);
   xTaskCreate(touch_sensor_task, "touch", 2000, NULL, 5, NULL);
   Serial.println("Done!");
 }
@@ -101,13 +86,20 @@ static void run_startup_colors(void)
   set_strip(OFF);
 }
 
+static void unlock(void)
+{
+  gEnableMOSFET = true;
+  vTaskDelay(MS(750));
+  gEnableMOSFET = false;
+}
+
 lock_state state = RESET;
 
 void loop()
 {
   // This fn is required by the arduino framework, but we are not using it. 
   // So it will simply delete itself (for now)
-  // float heading;
+  float heading;
   // char str[21];
   // while(1)
   // {
@@ -124,15 +116,32 @@ void loop()
   //   SerialBT.println(str);
   //   vTaskDelay(MS(1000));
   // }
+  
 
-  // Enumeration to describe lock states
-  run_startup_colors();
+  String passcode = "";
+  char c = '\0';
 
   while(1) {
     switch(state) {
       case RESET:
+        run_startup_colors();
+        state = STAGE_1;
+        xQueueReset(keypad_queue_handle);
         break;
       case STAGE_1:
+        xQueueReceive(keypad_queue_handle, &c, portMAX_DELAY);
+        SerialBT.printf("Pressed: %c\n", c);
+        passcode += c;
+        if(c == '#')
+        {
+          SerialBT << passcode << '\n';
+          Serial << passcode << '\n';
+          if(passcode == "1234#")
+          {
+            state = STAGE_5;
+          }
+          passcode = "";
+        }
         break;
       case STAGE_2:
         break;
@@ -141,11 +150,23 @@ void loop()
       case STAGE_4:
         break;
       case STAGE_5:
+        unlock();
+        state = DONE;
+        break;
+      case DONE:
         break;
       default:
         state = RESET;
         break;
     }
+
+    sensors_event_t event;
+    mmc.getEvent(&event);
+    heading = (atan2(event.magnetic.y, event.magnetic.x) * 180) / PI;
+
+    Serial << "X: " << event.magnetic.x << " Y: " << event.magnetic.y << " Z: " << event.magnetic.z << '\n';
+    Serial << heading << '\n';
+    Serial << event.magnetic.heading << '\n';
 
     vTaskDelay(MS(100));
   }
