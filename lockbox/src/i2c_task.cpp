@@ -8,6 +8,7 @@ void i2c_init(void)
   // SDA : 21
   // SCL : 22
   Wire.begin();
+  i2c_scan();
 }
 
 void i2c_scan(void)

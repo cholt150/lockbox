@@ -30,9 +30,6 @@ void blink_task(void *pvParameter)
 
 template<class T> inline Print &operator <<(Print &obj, T arg) { obj.print(arg); return obj; }
 
-// Create a queue for sending debug strings to oled task.
-QueueHandle_t keypad_queue_handle = xQueueCreate(5, sizeof(char));
-
 // Magnetometer object
 Adafruit_MMC5603 mmc = Adafruit_MMC5603(12345);
 BluetoothSerial SerialBT;
@@ -55,22 +52,18 @@ void setup()
 
   i2c_init();
 
-  i2c_scan();
-
   // Initialize magnetic sensor
   if (!mmc.begin(MMC56X3_DEFAULT_ADDRESS, &Wire))
   {
     Serial << "Unable to connect to MMC6503\n";
   }
 
-  Serial.println("\nCreating Tasks...\n");
-
-  xTaskCreate(blink_task, "blink", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
-  xTaskCreate(led_task, "leds", 2000, NULL, 5, NULL);
-  xTaskCreate(input_task, "serial_input", 2000, NULL, 7, NULL);
-  xTaskCreate(keypad_task, "keypad", 2000, NULL, 7, NULL);
-  xTaskCreate(touch_sensor_task, "touch", 2000, NULL, 5, NULL);
-  Serial.println("Done!");
+  Serial.println("====== Creating Tasks ======");
+  create_and_log_task(blink_task, "blink_task", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
+  create_and_log_task(led_task, "led_task", 2000, NULL, 5, NULL);
+  create_and_log_task(input_task, "command_task", 2000, NULL, 7, NULL);
+  create_and_log_task(keypad_task, "keypad_task", 2000, NULL, 7, NULL);
+  create_and_log_task(touch_sensor_task, "touch_sensor_task", 2000, NULL, 5, NULL);
 }
 
 static void run_startup_colors(void)

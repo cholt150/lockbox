@@ -15,6 +15,9 @@
 #define ONE_SECOND 1000 / portTICK_PERIOD_MS
 #define MS(x) x / portTICK_PERIOD_MS
 
+#define vstr(s) str(s)
+#define str(s) #s
+
 #define GPIO_ON 1
 #define GPIO_OFF 0
 
@@ -34,5 +37,14 @@ enum lock_state
 };
 
 extern QueueHandle_t keypad_queue_handle;
+
+void create_and_log_task(
+  TaskFunction_t pvTaskCode,
+  const char * const pcName,
+  const uint32_t usStackDepth,
+  void * const pvParameters,
+  UBaseType_t uxPriority,
+  TaskHandle_t * const pxCreatedTask
+);
 
 #endif // !LOCKBOX_COMMON_H
