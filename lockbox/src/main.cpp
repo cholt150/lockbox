@@ -5,16 +5,16 @@
 #include <Adafruit_MMC56x3.h>
 
 #include "lockbox_common.h"
-#include "debug.h"
-#include "oled_task.h"
 #include "i2c_task.h"
 #include "touch_task.h"
 #include "led_task.h"
 #include "input_task.h"
 #include "keypad_task.h"
+#include "switches.h"
+#include "puzzles.h"
 
-// This global is used to set the state of the MOSFET
-bool gEnableMOSFET = false;
+// This global is used to close the relay
+bool gCloseRelay = false;
 
 // MOSFET logic lives here for now
 void blink_task(void *pvParameter)
@@ -22,8 +22,8 @@ void blink_task(void *pvParameter)
   static bool led_state;
   while(true)
   {
-    gpio_set_level(LED_BUILTIN, gEnableMOSFET);
-    gpio_set_level(MOSFET_PIN, gEnableMOSFET);
+    gpio_set_level(LED_BUILTIN, gCloseRelay);
+    gpio_set_level(MOSFET_PIN, gCloseRelay);
     vTaskDelay(MS(100));
   }
 }
@@ -36,19 +36,12 @@ BluetoothSerial SerialBT;
 
 void setup()
 {
-  // initialize LED digital pin as an output.
-  gpio_pad_select_gpio(LED_BUILTIN);
-  gpio_set_direction(LED_BUILTIN, GPIO_MODE_OUTPUT);
-
-  // initialize MOSFET digital pin as an output.
-  gpio_pad_select_gpio(MOSFET_PIN);
-  gpio_set_direction(MOSFET_PIN, GPIO_MODE_OUTPUT);
+  // Configure the input/output pins
+  configure_gpio();
 
   //Serial
   Serial.begin(9600);
   SerialBT.begin("Lockbox");
-
-  keypad_init();
 
   i2c_init();
 
@@ -81,9 +74,9 @@ static void run_startup_colors(void)
 
 static void unlock(void)
 {
-  gEnableMOSFET = true;
+  gCloseRelay = true;
   vTaskDelay(MS(750));
-  gEnableMOSFET = false;
+  gCloseRelay = false;
 }
 
 lock_state state = RESET;
@@ -109,6 +102,12 @@ void loop()
   //   SerialBT.println(str);
   //   vTaskDelay(MS(1000));
   // }
+  
+  while (1)
+  {
+    main_puzzle();
+    vTaskDelay(MS(20));
+  }
   
 
   String passcode = "";
@@ -152,6 +151,8 @@ void loop()
         state = RESET;
         break;
     }
+
+    SerialBT << "switch_state: " << read_switches() << "\n";
 
     sensors_event_t event;
     mmc.getEvent(&event);

@@ -7,7 +7,7 @@
 #include <WiFi.h>
 #include <Cmd.h>
 
-extern bool gEnableMOSFET;
+extern bool gCloseRelay;
 
 extern BluetoothSerial SerialBT;
 
@@ -29,9 +29,9 @@ void cmd_unlock(int argc, char **argv) {
     set_strip(OFF);
     delay(200);
   }
-  gEnableMOSFET = true;
+  gCloseRelay = true;
   delay(pulse);
-  gEnableMOSFET = false;
+  gCloseRelay = false;
 }
 
 void input_task(void * pvParams)

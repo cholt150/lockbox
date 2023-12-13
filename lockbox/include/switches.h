@@ -1,0 +1,18 @@
+#pragma once
+
+void switches_init(void);
+uint16_t read_switches(void);
+
+enum {
+  SWITCH_1_BIT_LOCATION,
+  SWITCH_2_BIT_LOCATION,
+  SWITCH_3_BIT_LOCATION,
+  SWITCH_4_BIT_LOCATION,
+  SWITCH_5_BIT_LOCATION,
+};
+
+#define SWITCH_1_PIN GPIO_NUM_16
+#define SWITCH_2_PIN GPIO_NUM_17
+#define SWITCH_3_PIN GPIO_NUM_5
+#define SWITCH_4_PIN GPIO_NUM_18
+#define SWITCH_5_PIN GPIO_NUM_19

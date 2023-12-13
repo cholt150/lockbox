@@ -4,7 +4,7 @@
 #include "lockbox_common.h"
 #include "BluetoothSerial.h"
 
-extern bool gEnableMOSFET;
+extern bool gCloseRelay;
 extern BluetoothSerial SerialBT;
 
 void touch_sensor_init()
@@ -26,9 +26,9 @@ void touch_sensor_task(void *pvParams)
       // Serial.println(touch_msg);
       if(!touch_state)
       {
-        gEnableMOSFET = !gEnableMOSFET;
+        gCloseRelay = !gCloseRelay;
         // Notify BT terminal of state change
-        SerialBT.printf("MOSFET %i\n", gEnableMOSFET);
+        SerialBT.printf("MOSFET %i\n", gCloseRelay);
       }
       touch_state = true;
     }

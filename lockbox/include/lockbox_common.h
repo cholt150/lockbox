@@ -37,6 +37,7 @@ enum lock_state
 };
 
 extern QueueHandle_t keypad_queue_handle;
+extern QueueHandle_t puzzle_select_queue_handle;
 
 void create_and_log_task(
   TaskFunction_t pvTaskCode,
@@ -46,5 +47,7 @@ void create_and_log_task(
   UBaseType_t uxPriority,
   TaskHandle_t * const pxCreatedTask
 );
+
+void configure_gpio(void);
 
 #endif // !LOCKBOX_COMMON_H

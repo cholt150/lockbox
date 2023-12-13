@@ -46,6 +46,7 @@ void set_strip(uint8_t color)
 void led_task(void *pvParams)
 {
   strip.begin();
+  strip.clear();
 
   static led_state led_to_process;
   

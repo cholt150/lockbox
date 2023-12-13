@@ -104,9 +104,7 @@ static char poll_keypad(void)
       switch(edge)
       {
         case RISING_EDGE:
-          // SerialBT.printf("Pressed: %i %i\n", row, col);
           character_pressed = keypad_lookup_table[row][col];
-          // SerialBT.printf("Pressed: %c\n", character_pressed);
           break;
         case FALLING_EDGE:
         case NO_EDGE:
@@ -135,7 +133,14 @@ void keypad_task(void *pvParams)
   {
     char button_read = poll_keypad();
     if('\0' != button_read){
-      xQueueSendToBack(keypad_queue_handle, &button_read, MS(1));
+      if((button_read >= 'A') && (button_read <= 'D'))
+      {
+        xQueueSendToBack(puzzle_select_queue_handle, &button_read, MS(1));
+      }
+      else
+      {
+        xQueueSendToBack(keypad_queue_handle, &button_read, MS(1));
+      }
     }
 
     vTaskDelay(MS(KEYPAD_POLL_RATE));
