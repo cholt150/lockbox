@@ -43,6 +43,8 @@ void setup()
   Serial.begin(9600);
   SerialBT.begin("Lockbox");
 
+  led_init();
+
   i2c_init();
 
   // Initialize magnetic sensor

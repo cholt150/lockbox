@@ -72,7 +72,7 @@ bool main_puzzle(void)
       }
       else
       {
-        set_led(0, YELLOW);
+        set_led(0, CYAN);
       }
       break;
     case 'B':
@@ -83,14 +83,14 @@ bool main_puzzle(void)
       }
       else
       {
-        set_led(1, YELLOW);
+        set_led(1, CYAN);
       }
       break;
     case 'C':
-      set_led(3, YELLOW);
+      set_led(3, CYAN);
       break;
     case 'D':
-      set_led(4, YELLOW);
+      set_led(4, CYAN);
       break;
   }
   return true;

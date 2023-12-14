@@ -34,12 +34,24 @@ void cmd_unlock(int argc, char **argv) {
   gCloseRelay = false;
 }
 
+void cmd_led(int argc, char **argv)
+{
+  if(argc > 1)
+  {
+    add_to_led_sequence(atoi(argv[1]), BLUE, 1000);
+    add_to_led_sequence(atoi(argv[1]), RED, 1000);
+    add_to_led_sequence(atoi(argv[1]), GREEN, 1000);
+    add_to_led_sequence(atoi(argv[1]), OFF, 0);
+  }
+}
+
 void input_task(void * pvParams)
 {
   // Link up the command parser to the BT Serial stream
   cmdInit(&SerialBT);
   cmdAdd("unlock", cmd_unlock);
   cmdAdd("status", cmd_get_status);
+  cmdAdd("led", cmd_led);
 
   while(1)
   {
