@@ -6,7 +6,7 @@
 #include <queue>
 
 // Create A queue for setting 
-QueueHandle_t led_queue = xQueueCreate(32, sizeof(led_seq_state));
+QueueHandle_t led_queue = xQueueCreate(4, sizeof(led_seq_state));
 
 TimerHandle_t led_timers[N_LEDS] {0};
 std::queue<led_seq_state> led_queues[N_LEDS];

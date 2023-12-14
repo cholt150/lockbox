@@ -31,4 +31,6 @@ typedef enum
 
 void keypad_init(void);
 
+char get_selected_puzzle(void);
+
 void keypad_task(void *pvParams);

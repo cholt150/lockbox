@@ -110,61 +110,8 @@ void loop()
     main_puzzle();
     vTaskDelay(MS(20));
   }
-  
 
-  String passcode = "";
-  char c = '\0';
+  vTaskDelay(MS(100));
 
-  while(1) {
-    switch(state) {
-      case RESET:
-        run_startup_colors();
-        state = STAGE_1;
-        xQueueReset(keypad_queue_handle);
-        break;
-      case STAGE_1:
-        xQueueReceive(keypad_queue_handle, &c, portMAX_DELAY);
-        SerialBT.printf("Pressed: %c\n", c);
-        passcode += c;
-        if(c == '#')
-        {
-          SerialBT << passcode << '\n';
-          Serial << passcode << '\n';
-          if(passcode == "1234#")
-          {
-            state = STAGE_5;
-          }
-          passcode = "";
-        }
-        break;
-      case STAGE_2:
-        break;
-      case STAGE_3:
-        break;
-      case STAGE_4:
-        break;
-      case STAGE_5:
-        unlock();
-        state = DONE;
-        break;
-      case DONE:
-        break;
-      default:
-        state = RESET;
-        break;
-    }
-
-    SerialBT << "switch_state: " << read_switches() << "\n";
-
-    sensors_event_t event;
-    mmc.getEvent(&event);
-    heading = (atan2(event.magnetic.y, event.magnetic.x) * 180) / PI;
-
-    Serial << "X: " << event.magnetic.x << " Y: " << event.magnetic.y << " Z: " << event.magnetic.z << '\n';
-    Serial << heading << '\n';
-    Serial << event.magnetic.heading << '\n';
-
-    vTaskDelay(MS(100));
-  }
   vTaskDelete(NULL);
 }

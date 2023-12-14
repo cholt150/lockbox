@@ -32,6 +32,7 @@ void switches_init(void)
 uint16_t read_switches(void)
 {
   uint16_t result = 0;
+  static uint16_t last_result = 0;
   // Switches use active-low logic, so invert the gpio read.
   result |= (!gpio_get_level(SWITCH_1_PIN)) << SWITCH_1_BIT_LOCATION;
   result |= (!gpio_get_level(SWITCH_2_PIN)) << SWITCH_2_BIT_LOCATION;
@@ -39,6 +40,10 @@ uint16_t read_switches(void)
   result |= (!gpio_get_level(SWITCH_4_PIN)) << SWITCH_4_BIT_LOCATION;
   result |= (!gpio_get_level(SWITCH_5_PIN)) << SWITCH_5_BIT_LOCATION;
 
-  Serial.println(result);
+  if(last_result != result)
+  {
+    last_result = result;
+    Serial.println(result);
+  }
   return result;
 }

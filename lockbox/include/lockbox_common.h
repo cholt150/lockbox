@@ -2,6 +2,7 @@
 #define LOCKBOX_COMMON_H
 
 #include <Arduino.h>
+#include <Adafruit_MMC56x3.h>
 
 #include "BluetoothSerial.h"
 
@@ -22,6 +23,8 @@
 #define GPIO_OFF 0
 
 template<class T> inline Print &operator <<(Print &obj, T arg);
+
+extern Adafruit_MMC5603 mmc;
 
 extern BluetoothSerial SerialBT;
 

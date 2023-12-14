@@ -41,6 +41,8 @@ gpio_num_t col_pins[KEYPAD_COLUMNS] = {
   C4_PIN
 };
 
+char puzzle_select = 'A';
+
 void keypad_init(void)
 {
   gpio_pad_select_gpio(C1_PIN);
@@ -127,6 +129,12 @@ static char poll_keypad(void)
   return character_pressed;
 }
 
+// return the last selected puzzle, A-D
+char get_selected_puzzle(void)
+{
+  return puzzle_select;
+}
+
 void keypad_task(void *pvParams)
 {
   while(1)
@@ -135,7 +143,8 @@ void keypad_task(void *pvParams)
     if('\0' != button_read){
       if((button_read >= 'A') && (button_read <= 'D'))
       {
-        xQueueSendToBack(puzzle_select_queue_handle, &button_read, MS(1));
+        // xQueueSendToBack(puzzle_select_queue_handle, &button_read, MS(1));
+        puzzle_select = button_read;
       }
       else
       {

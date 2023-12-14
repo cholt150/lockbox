@@ -24,10 +24,12 @@ typedef struct {
 } led_seq_state;
 
 #define RED     rgb_color{255,0,0}
+#define ORANGE  rgb_color{255,128,0}
+#define YELLOW  rgb_color{255,255,51}
 #define GREEN   rgb_color{0,255,0}
 #define BLUE    rgb_color{0,0,255}
+#define PURPLE  rgb_color{127,0,255}
 #define CYAN    rgb_color{0,255,255}
-#define YELLOW  rgb_color{255,128,0}
 #define OFF     rgb_color{0,0,0}
 
 void led_init(void);
