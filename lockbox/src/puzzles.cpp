@@ -150,41 +150,84 @@ bool compass_puzzle(void)
   return false;
 }
 
+bool combo_puzzle(void)
+{
+  static_assert(PASSCODE_LENGTH == strlen(PASSCODE));
+  static bool solved = false;
+  static String passcode = "";
+  static String correct_passcode = PASSCODE;
+  char digit;
+  static int n_digits = 0;
+  auto digit_read = xQueueReceive(keypad_queue_handle, &digit, 0);
+  if(pdTRUE == digit_read && !solved)
+  {
+    if(n_digits == 0)
+    {
+      set_strip(OFF);
+    }
+    if(digit != '*' && digit != '#')
+    {
+      passcode += digit;
+      if(digit == correct_passcode[n_digits])
+      {
+        set_led(n_digits, GREEN);
+      }
+      else if(correct_passcode.indexOf(digit) != -1)
+      {
+        set_led(n_digits, PURPLE);
+      }
+      else
+      {
+        set_led(n_digits, RED);
+      }
+      n_digits++;
+    }
+  }
+  if(passcode.length() == PASSCODE_LENGTH && !solved)
+  {
+    if(passcode == correct_passcode)
+    {
+      solved = true;
+    }
+    else
+    {
+      passcode = "";
+      n_digits = 0;
+    }
+  }
+  if(solved)
+  {
+    set_strip(GREEN);
+  }
+  return solved;
+}
+
 bool main_puzzle(void)
 {
   static char selected_puzzle = '\0';
-  // auto button_received = xQueueReceive(puzzle_select_queue_handle, &selected_puzzle, 0);
+  static char prev_selected_puzzle = '\0';
   selected_puzzle = get_selected_puzzle();
-  // set_puzzle_leds(selected_puzzle);
   switch(selected_puzzle)
   {
     case 'A':
       solved_state[0] = switch_puzzle();
-      if(solved_state[0])
-      {
-        selected_puzzle = '\0';
-      }
-      else
-      {
-        // set_led(0, CYAN);
-      }
+      prev_selected_puzzle = selected_puzzle;
       break;
     case 'B':
       solved_state[1] = skutnik_puzzle();
-      if(solved_state[1])
-      {
-        selected_puzzle = '\0';
-      }
-      else
-      {
-        // set_led(1, CYAN);
-      }
+      prev_selected_puzzle = selected_puzzle;
       break;
     case 'C':
       solved_state[2] = compass_puzzle();
+      prev_selected_puzzle = selected_puzzle;
       break;
     case 'D':
-      set_led(4, CYAN);
+      if(prev_selected_puzzle != selected_puzzle)
+      {
+        set_strip(OFF);
+      }
+      solved_state[3] = combo_puzzle();
+      prev_selected_puzzle = selected_puzzle;
       break;
   }
   return true;

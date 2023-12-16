@@ -12,8 +12,8 @@
 #define SKUTNIK_COMBO_4 0b11001
 #define SKUTNIK_COMBO_5 0b10110
 
-#define PASSCODE_LENGTH 8
-#define PASSCODE "12345678"
+#define PASSCODE "41531"
+#define PASSCODE_LENGTH 5
 
 bool switch_puzzle(void);
 bool main_puzzle(void);
