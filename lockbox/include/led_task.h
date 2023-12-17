@@ -8,8 +8,13 @@
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
+#include <Adafruit_NeoPixel.h>
 
 extern BluetoothSerial SerialBT;
+
+extern Adafruit_NeoPixel strip;
+
+extern bool celebrate;
 
 typedef struct {
   uint8_t r;

@@ -11,7 +11,7 @@ extern bool gCloseRelay;
 
 extern BluetoothSerial SerialBT;
 
-extern lock_state state;
+lock_state state;
 
 void cmd_get_status(int argc, char **argv) {
   auto stream = cmdGetStream();

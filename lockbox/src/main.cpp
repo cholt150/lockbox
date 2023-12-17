@@ -74,44 +74,29 @@ static void run_startup_colors(void)
   set_strip(OFF);
 }
 
+bool celebrate = false;
+
 static void unlock(void)
 {
+  celebrate = true;
   gCloseRelay = true;
   vTaskDelay(MS(750));
   gCloseRelay = false;
 }
 
-lock_state state = RESET;
-
 void loop()
 {
-  // This fn is required by the arduino framework, but we are not using it. 
-  // So it will simply delete itself (for now)
-  float heading;
-  // char str[21];
-  // while(1)
-  // {
-  //   sensors_event_t event;
-  //   mmc.getEvent(&event);
-  //   heading = (atan2(event.magnetic.y, event.magnetic.x) * 180) / PI;
-
-  //   sprintf(
-  //     str, 
-  //     "1:%i 2:%i", 
-  //     static_cast<int>(heading), 
-  //     static_cast<int>(event.magnetic.heading)
-  //   );
-  //   SerialBT.println(str);
-  //   vTaskDelay(MS(1000));
-  // }
-  
+  bool unlocked = false;
   while (1)
   {
-    main_puzzle();
+    bool solved = main_puzzle();
+    if(solved && !unlocked)
+    {
+      unlock();
+      unlocked = true;
+    }
     vTaskDelay(MS(20));
   }
-
-  vTaskDelay(MS(100));
 
   vTaskDelete(NULL);
 }

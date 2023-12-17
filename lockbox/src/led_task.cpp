@@ -69,42 +69,48 @@ void led_task(void *pvParams)
   strip.setBrightness(128);
   strip.clear();
 
-  // static led_seq_state led_to_process;
+  uint16_t frc;
   
   while(1)
   {
-    led_seq_state led_to_process {0};
-    while(pdTRUE == xQueueReceive(led_queue, &led_to_process, 0))
+    frc += 32;
+    if(!celebrate)
     {
-      led_queues[led_to_process.led_num].push(led_to_process);
-    }
-
-    for(auto i = 0; i < N_LEDS; i++)
-    {
-      if(
-        pdFALSE == xTimerIsTimerActive(led_timers[i]) &&
-        !led_queues[i].empty()
-        )
+      led_seq_state led_to_process {0};
+      while(pdTRUE == xQueueReceive(led_queue, &led_to_process, 0))
       {
-        // If this led queue has a new state and the previous timer has expired
-        led_seq_state this_state;
-        this_state = led_queues[i].front();
-        led_queues[i].pop();
-        strip.setPixelColor(
-          this_state.led_num,
-          this_state.color.r,
-          this_state.color.g,
-          this_state.color.b
-        );
-        if(this_state.duration != 0)
+        led_queues[led_to_process.led_num].push(led_to_process);
+      }
+
+      for(auto i = 0; i < N_LEDS; i++)
+      {
+        if(
+          pdFALSE == xTimerIsTimerActive(led_timers[i]) &&
+          !led_queues[i].empty()
+          )
         {
-          xTimerChangePeriod(led_timers[i], MS(this_state.duration), MS(1));
-          xTimerStart(led_timers[i], MS(1));
+          // If this led queue has a new state and the previous timer has expired
+          led_seq_state this_state;
+          this_state = led_queues[i].front();
+          led_queues[i].pop();
+          strip.setPixelColor(
+            this_state.led_num,
+            this_state.color.r,
+            this_state.color.g,
+            this_state.color.b
+          );
+          if(this_state.duration != 0)
+          {
+            xTimerChangePeriod(led_timers[i], MS(this_state.duration), MS(1));
+            xTimerStart(led_timers[i], MS(1));
+          }
         }
       }
     }
-
-    
+    else
+    {
+      strip.rainbow(frc);
+    }
     strip.show();
     vTaskDelay(MS(1));
   }

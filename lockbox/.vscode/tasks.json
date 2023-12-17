@@ -1,0 +1,17 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "PlatformIO",
+			"task": "Upload and Monitor (debug)",
+			"problemMatcher": [
+				"$platformio"
+			],
+			"label": "PlatformIO: Upload and Monitor (debug)",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		}
+	]
+}

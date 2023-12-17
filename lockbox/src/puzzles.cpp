@@ -81,6 +81,7 @@ bool switch_puzzle(void)
 bool skutnik_puzzle(void)
 {
   static uint16_t output = 0;
+  static bool solved = false;
   static uint16_t combos[N_LEDS] = {
     SKUTNIK_COMBO_1,
     SKUTNIK_COMBO_2,
@@ -107,47 +108,77 @@ bool skutnik_puzzle(void)
       set_led(i, RED);
     }
   }
-  return (output == 0b11111);
+  solved = (output == 0b11111);
+  return solved;
 }
 
 bool compass_puzzle(void)
 {
+  static bool solved = false;
+  static uint16_t n_times_on_target = 0;
+
   sensors_event_t event;
   mmc.getEvent(&event);
   auto heading = (atan2(event.magnetic.y, event.magnetic.x) * 180) / PI;
 
-  if(heading > -25 && heading <= -15)
+  if(!solved)
   {
-    set_strip(OFF);
-    set_led(0, PURPLE);
-  }
-  else if(heading > -15 && heading <= -5)
-  {
-    set_strip(OFF);
-    set_led(1, PURPLE);
-  }
-  else if(heading > -5 && heading <= 5)
-  {
-    set_strip(OFF);
-    set_led(2, PURPLE);
-  }
-  else if(heading > 5 && heading <= 15)
-  {
-    set_strip(OFF);
-    set_led(3, PURPLE);
-  }
-  else if(heading > 15 && heading <= 25)
-  {
-    set_strip(OFF);
-    set_led(4, PURPLE);
+    if(heading > -25 && heading <= -15)
+    {
+      n_times_on_target = 0;
+      set_strip(OFF);
+      set_led(0, GREEN);
+    }
+    else if(heading > -15 && heading <= -5)
+    {
+      n_times_on_target = 0;
+      set_strip(OFF);
+      set_led(1, GREEN);
+    }
+    else if(heading > -5 && heading <= 5)
+    {
+      auto target_color = GREEN;
+      (n_times_on_target % 2 == 0) ? target_color = GREEN : target_color = OFF;
+      n_times_on_target++;
+      set_strip(OFF);
+      set_led(2, target_color);
+      if(n_times_on_target >= 4)
+      {
+        set_led(1, target_color);
+        set_led(3, target_color);
+      }
+      if(n_times_on_target >= 8)
+      {
+        set_led(0, target_color);
+        set_led(4, target_color);
+        solved = true;
+      }
+    }
+    else if(heading > 5 && heading <= 15)
+    {
+      n_times_on_target = 0;
+      set_strip(OFF);
+      set_led(3, GREEN);
+    }
+    else if(heading > 15 && heading <= 25)
+    {
+      n_times_on_target = 0;
+      set_strip(OFF);
+      set_led(4, GREEN);
+    }
+    else
+    {
+      n_times_on_target = 0;
+      set_strip(OFF);
+    }
   }
   else
   {
-    set_strip(OFF);
+    set_strip(GREEN);
   }
 
   vTaskDelay(MS(230));
-  return false;
+  return solved;
 }
 
 bool combo_puzzle(void)
@@ -174,7 +205,7 @@ bool combo_puzzle(void)
       }
       else if(correct_passcode.indexOf(digit) != -1)
       {
-        set_led(n_digits, PURPLE);
+        set_led(n_digits, ORANGE);
       }
       else
       {
@@ -202,33 +233,40 @@ bool combo_puzzle(void)
   return solved;
 }
 
+void unlock(void)
+{}
+
 bool main_puzzle(void)
 {
   static char selected_puzzle = '\0';
   static char prev_selected_puzzle = '\0';
   selected_puzzle = get_selected_puzzle();
-  switch(selected_puzzle)
+  bool all_solved = solved_state[0] && solved_state[1] && solved_state[2] && solved_state[3];
+  if(!all_solved)
   {
-    case 'A':
-      solved_state[0] = switch_puzzle();
-      prev_selected_puzzle = selected_puzzle;
-      break;
-    case 'B':
-      solved_state[1] = skutnik_puzzle();
-      prev_selected_puzzle = selected_puzzle;
-      break;
-    case 'C':
-      solved_state[2] = compass_puzzle();
-      prev_selected_puzzle = selected_puzzle;
-      break;
-    case 'D':
-      if(prev_selected_puzzle != selected_puzzle)
-      {
-        set_strip(OFF);
-      }
-      solved_state[3] = combo_puzzle();
-      prev_selected_puzzle = selected_puzzle;
-      break;
+    switch(selected_puzzle)
+    {
+      case 'A':
+        solved_state[0] = switch_puzzle();
+        prev_selected_puzzle = selected_puzzle;
+        break;
+      case 'B':
+        solved_state[1] = skutnik_puzzle();
+        prev_selected_puzzle = selected_puzzle;
+        break;
+      case 'C':
+        solved_state[2] = compass_puzzle();
+        prev_selected_puzzle = selected_puzzle;
+        break;
+      case 'D':
+        if(prev_selected_puzzle != selected_puzzle)
+        {
+          set_strip(OFF);
+        }
+        solved_state[3] = combo_puzzle();
+        prev_selected_puzzle = selected_puzzle;
+        break;
+    }
   }
-  return true;
+  return all_solved;
 }
