@@ -1,5 +1,6 @@
 #include "lockbox_common.h"
 #include "switches.h"
+#include "oled.h"
 
 void switches_init(void)
 {
@@ -32,7 +33,7 @@ void switches_init(void)
 uint16_t read_switches(void)
 {
   uint16_t result = 0;
-  static uint16_t last_result = 0;
+  static uint16_t last_result = 0xFFFF;
   // Switches use active-low logic, so invert the gpio read.
   result |= (!gpio_get_level(SWITCH_1_PIN)) << SWITCH_1_BIT_LOCATION;
   result |= (!gpio_get_level(SWITCH_2_PIN)) << SWITCH_2_BIT_LOCATION;
@@ -43,6 +44,9 @@ uint16_t read_switches(void)
   if(last_result != result)
   {
     last_result = result;
+    char str[21];
+    sprintf(str, "<INFO> 0x%02X", result);
+    set_oled_body(3, str);
     Serial.println(result);
   }
   return result;

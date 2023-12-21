@@ -1,16 +1,12 @@
-#include "puzzles.h"
-#include "lockbox_common.h"
-#include "switches.h"
 #include "keypad_task.h"
 #include "led_task.h"
+#include "lockbox_common.h"
+#include "oled.h"
+#include "puzzles.h"
+#include "switches.h"
 #include <Adafruit_MMC56x3.h>
 
 static bool solved_state[4] = {0};
-// This array maps each puzzle to its LED.
-// Since the middle LED is used as an indicator, 2 is skipped.
-static const uint8_t puzzle_to_led_map[4] = {
-  0, 1, 3, 4
-};
 
 template<class T> inline Print &operator <<(Print &obj, T arg) { obj.print(arg); return obj; }
 
@@ -233,13 +229,11 @@ bool combo_puzzle(void)
   return solved;
 }
 
-void unlock(void)
-{}
-
 bool main_puzzle(void)
 {
   static char selected_puzzle = '\0';
   static char prev_selected_puzzle = '\0';
+
   selected_puzzle = get_selected_puzzle();
   bool all_solved = solved_state[0] && solved_state[1] && solved_state[2] && solved_state[3];
   if(!all_solved)
@@ -247,14 +241,49 @@ bool main_puzzle(void)
     switch(selected_puzzle)
     {
       case 'A':
+        if(prev_selected_puzzle != selected_puzzle)
+        {
+          set_strip(OFF);
+          set_oled_header("puzzle://A");
+          set_oled_body(1, "<INPUT> SWITCH ARRAY");
+          set_oled_body(2, "<OBJECTIVE> 5 GREEN");
+          // display.clearDisplay();
+          // display.setCursor(0,0);
+          // display.println("puzzle://A");
+          // display.display();
+        }
         solved_state[0] = switch_puzzle();
         prev_selected_puzzle = selected_puzzle;
         break;
       case 'B':
+        if(prev_selected_puzzle != selected_puzzle)
+        {
+          set_strip(OFF);
+          set_oled_header("puzzle://B");
+          set_oled_body(1, "<INPUT> 1-5");
+          set_oled_body(2, "<OBJECTIVE> 5 GREEN");
+          set_oled_body(3, "");
+          // display.clearDisplay();
+          // display.setCursor(0,0);
+          // display.println("puzzle://B");
+          // display.display();
+        }
         solved_state[1] = skutnik_puzzle();
         prev_selected_puzzle = selected_puzzle;
         break;
       case 'C':
+        if(prev_selected_puzzle != selected_puzzle)
+        {
+          set_strip(OFF);
+          set_oled_header("puzzle://C");
+          set_oled_body(1, "<INPUT> ???");
+          set_oled_body(2, "<OBJECTIVE> 5 GREEN");
+          set_oled_body(3, "");
+          // display.clearDisplay();
+          // display.setCursor(0,0);
+          // display.println("puzzle://C");
+          // display.display();
+        }
         solved_state[2] = compass_puzzle();
         prev_selected_puzzle = selected_puzzle;
         break;
@@ -262,6 +291,14 @@ bool main_puzzle(void)
         if(prev_selected_puzzle != selected_puzzle)
         {
           set_strip(OFF);
+          set_oled_header("puzzle://D");
+          set_oled_body(1, "<INPUT> 0-9");
+          set_oled_body(2, "<OBJECTIVE> 5 GREEN");
+          set_oled_body(3, "");
+          // display.clearDisplay();
+          // display.setCursor(0,0);
+          // display.println("puzzle://D");
+          // display.display();
         }
         solved_state[3] = combo_puzzle();
         prev_selected_puzzle = selected_puzzle;

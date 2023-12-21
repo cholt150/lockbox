@@ -1,11 +1,8 @@
-#ifndef OLED_TASK_H
-#define OLED_TASK_H
+#pragma once
 
-#include <SPI.h>
-#include <Wire.h>
-#include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#include <list>
+
+extern Adafruit_SSD1306 display;
 
 #define OLED_WIDTH 128
 #define OLED_HEIGHT 64
@@ -15,6 +12,7 @@
 #define N_TEXT_ROWS 7
 #define N_CHARS 21
 
+void oled_init();
+void set_oled_header(char *str);
+void set_oled_body(int line, char *str);
 void oled_task(void *);
-
-#endif

@@ -4,14 +4,15 @@
 #include <freertos/queue.h>
 #include <Adafruit_MMC56x3.h>
 
-#include "lockbox_common.h"
 #include "i2c_task.h"
-#include "touch_task.h"
-#include "led_task.h"
 #include "input_task.h"
 #include "keypad_task.h"
-#include "switches.h"
+#include "led_task.h"
+#include "lockbox_common.h"
+#include "oled.h"
 #include "puzzles.h"
+#include "switches.h"
+#include "touch_task.h"
 
 // This global is used to close the relay
 bool gCloseRelay = false;
@@ -47,6 +48,8 @@ void setup()
 
   i2c_init();
 
+  oled_init();
+
   // Initialize magnetic sensor
   if (!mmc.begin(MMC56X3_DEFAULT_ADDRESS, &Wire))
   {
@@ -55,10 +58,11 @@ void setup()
 
   Serial.println("====== Creating Tasks ======");
   create_and_log_task(blink_task, "blink_task", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
-  create_and_log_task(led_task, "led_task", 2000, NULL, 5, NULL);
+  create_and_log_task(led_task, "led_task", 2000, NULL, 4, NULL);
   create_and_log_task(input_task, "command_task", 2000, NULL, 7, NULL);
   create_and_log_task(keypad_task, "keypad_task", 2000, NULL, 7, NULL);
   create_and_log_task(touch_sensor_task, "touch_sensor_task", 2000, NULL, 5, NULL);
+  create_and_log_task(oled_task, "oled_task", 2000, NULL, 5, NULL);
 }
 
 static void run_startup_colors(void)

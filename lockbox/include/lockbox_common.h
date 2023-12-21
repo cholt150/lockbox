@@ -22,6 +22,14 @@
 #define GPIO_ON 1
 #define GPIO_OFF 0
 
+#define OLED_WIDTH 128
+#define OLED_HEIGHT 64
+#define OLED_RESET -1
+#define OLED_ADDRESS 0x3C
+
+#define N_TEXT_ROWS 7
+#define N_CHARS 21
+
 template<class T> inline Print &operator <<(Print &obj, T arg);
 
 extern Adafruit_MMC5603 mmc;
