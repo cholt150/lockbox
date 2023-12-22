@@ -98,6 +98,8 @@ void loop()
     {
       unlock();
       unlocked = true;
+      clear_oled_body();
+      set_oled_header("Unlocked!");
     }
     vTaskDelay(MS(20));
   }
