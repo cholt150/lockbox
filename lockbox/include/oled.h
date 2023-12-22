@@ -15,4 +15,5 @@ extern Adafruit_SSD1306 display;
 void oled_init();
 void set_oled_header(char *str);
 void set_oled_body(int line, char *str);
+void clear_oled_body(void);
 void oled_task(void *);

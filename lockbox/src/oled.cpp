@@ -12,17 +12,23 @@ int oled_row_locations[N_TEXT_ROWS] = {
 
 Adafruit_SSD1306 display(OLED_WIDTH, OLED_HEIGHT, &Wire, OLED_RESET);
 
-auto header_queue = xQueueCreate(2,16);
+auto header_queue = xQueueCreate(4,16);
 char header[16] = {'\0'};
 
-auto body_1_queue = xQueueCreate(2,21);
-char body_1[21] = {'\0'};
+auto body_1_queue = xQueueCreate(4,23);
+char body_1[23] = {'\0'};
 
-auto body_2_queue = xQueueCreate(2,21);
-char body_2[21] = {'\0'};
+auto body_2_queue = xQueueCreate(4,23);
+char body_2[23] = {'\0'};
 
-auto body_3_queue = xQueueCreate(2,21);
-char body_3[21] = {'\0'};
+auto body_3_queue = xQueueCreate(4,23);
+char body_3[23] = {'\0'};
+
+auto body_4_queue = xQueueCreate(4,23);
+char body_4[23] = {'\0'};
+
+auto body_5_queue = xQueueCreate(4,23);
+char body_5[23] = {'\0'};
 
 void set_oled_header(char *str)
 {
@@ -34,7 +40,7 @@ void set_oled_header(char *str)
 
 void set_oled_body(int line, char *str)
 {
-  if(strlen(str) < 21)
+  if(strlen(str) < 23)
   {
     switch(line)
     {
@@ -47,11 +53,26 @@ void set_oled_body(int line, char *str)
       case 3:
         xQueueSendToBack(body_3_queue, str, MS(1));
         break;
+      case 4:
+        xQueueSendToBack(body_4_queue, str, MS(1));
+        break;
+      case 5:
+        xQueueSendToBack(body_5_queue, str, MS(1));
+        break;
       default:
         break;
     }
     
   }
+}
+
+void clear_oled_body(void)
+{
+  set_oled_body(1,"");
+  set_oled_body(2,"");
+  set_oled_body(3,"");
+  set_oled_body(4,"");
+  set_oled_body(5,"");
 }
 
 void oled_init()
@@ -86,7 +107,9 @@ void oled_task(void *pvParameters)
     auto new_body_1 = xQueueReceive(body_1_queue, body_1, 0);
     auto new_body_2 = xQueueReceive(body_2_queue, body_2, 0);
     auto new_body_3 = xQueueReceive(body_3_queue, body_3, 0);
-    bool update_needed = new_header || new_body_1 || new_body_2 || new_body_3;
+    auto new_body_4 = xQueueReceive(body_4_queue, body_4, 0);
+    auto new_body_5 = xQueueReceive(body_5_queue, body_5, 0);
+    bool update_needed = new_header || new_body_1 || new_body_2 || new_body_3 || new_body_4 || new_body_5;
     if(update_needed)
     {
       display.clearDisplay();
@@ -102,6 +125,8 @@ void oled_task(void *pvParameters)
     display.println(body_1);
     display.println(body_2);
     display.println(body_3);
+    display.println(body_4);
+    display.println(body_5);
     if(update_needed)
     {
       display.display();
