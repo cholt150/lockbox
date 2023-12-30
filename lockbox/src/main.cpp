@@ -12,7 +12,6 @@
 #include "oled.h"
 #include "puzzles.h"
 #include "switches.h"
-#include "touch_task.h"
 
 // This global is used to close the relay
 bool gCloseRelay = false;
@@ -61,21 +60,7 @@ void setup()
   create_and_log_task(led_task, "led_task", 2000, NULL, 4, NULL);
   create_and_log_task(input_task, "command_task", 2000, NULL, 7, NULL);
   create_and_log_task(keypad_task, "keypad_task", 2000, NULL, 7, NULL);
-  create_and_log_task(touch_sensor_task, "touch_sensor_task", 2000, NULL, 5, NULL);
   create_and_log_task(oled_task, "oled_task", 2000, NULL, 5, NULL);
-}
-
-static void run_startup_colors(void)
-{
-  set_led(2, BLUE);
-  delay(500);
-  set_led(1, GREEN);
-  set_led(3, GREEN);
-  delay(500);
-  set_led(0, RED);
-  set_led(4, RED);
-  delay(2000);
-  set_strip(OFF);
 }
 
 bool celebrate = false;
